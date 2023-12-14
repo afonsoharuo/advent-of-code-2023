@@ -1,0 +1,98 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"regexp"
+	"strconv"
+	"strings"
+)
+
+type Scratchcard struct {
+	WinningNumbers map[int]bool
+	CardNumbers    []int
+}
+
+func readScratchcards(filename string) []Scratchcard {
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	var scratchcards []Scratchcard
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		values := strings.Split(line, ":")
+		numbers := strings.Split(values[1], "|")
+
+		s := Scratchcard{
+			make(map[int]bool),
+			make([]int, 0),
+		}
+
+		re := regexp.MustCompile(`\d+`)
+
+		winningNumbersStr := numbers[0]
+		winningMatches := re.FindAllStringIndex(winningNumbersStr, -1) // Find all matches
+		if winningMatches == nil {
+			log.Fatal("could not match winning numbers")
+		}
+
+		for _, i := range winningMatches {
+			n, err := strconv.Atoi(winningNumbersStr[i[0]:i[1]])
+			if err != nil {
+				log.Fatal("could not convert number")
+			}
+			s.WinningNumbers[n] = true
+		}
+
+		cardNumbersStr := numbers[1]
+		cardMatches := re.FindAllStringIndex(cardNumbersStr, -1) // Find all matches
+		if cardMatches == nil {
+			log.Fatal("could not match card numbers")
+		}
+
+		for _, i := range cardMatches {
+			n, err := strconv.Atoi(cardNumbersStr[i[0]:i[1]])
+			if err != nil {
+				log.Fatal("could not convert number")
+			}
+			s.CardNumbers = append(s.CardNumbers, n)
+		}
+
+		scratchcards = append(scratchcards, s)
+	}
+
+	return scratchcards
+}
+
+func main() {
+	scratchcards := readScratchcards("input.txt")
+	numScratchcards := make([]int, len(scratchcards))
+	for i := 0; i < len(scratchcards); i++ {
+		numScratchcards[i] = 1
+	}
+
+	for i, s := range scratchcards {
+		count := 0
+		for _, n := range s.CardNumbers {
+			_, present := s.WinningNumbers[n]
+			if present {
+				count++
+			}
+		}
+		for j := 0; j < count; j++ {
+			numScratchcards[i+j+1] += numScratchcards[i]
+		}
+	}
+
+	sum := 0
+	for _, num := range numScratchcards {
+		sum += num
+	}
+	fmt.Println(sum)
+}
