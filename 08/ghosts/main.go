@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math/big"
 	"os"
 	"regexp"
 	"strings"
@@ -83,39 +84,50 @@ func readMap(filename string) (Directions, []*Node) {
 	return ds, initialNodes
 }
 
+func calcLCM(a, b *big.Int) *big.Int {
+	gcd := new(big.Int)
+	div := new(big.Int)
+	prod := new(big.Int)
+
+	gcd.GCD(nil, nil, a, b)
+	div.Div(b, gcd)
+	prod.Mul(a, div)
+
+	return prod
+}
+
 func main() {
 	ds, nodes := readMap("input.txt")
-	fmt.Println(ds)
 	for _, n := range nodes {
 		fmt.Println(n.label)
 	}
 
-	i := 0
 	n := len(ds)
-	for {
-		switch ds[i%n] {
-		case 'L':
-			for j, node := range nodes {
-				nodes[j] = node.left
+	indexAtZ := make([]*big.Int, len(nodes))
+	for k, node := range nodes {
+		i := 0
+		for {
+			switch ds[i%n] {
+			case 'L':
+				node = node.left
+			case 'R':
+				node = node.right
 			}
-		case 'R':
-			for j, node := range nodes {
-				nodes[j] = node.right
-			}
-		}
 
-		numNodesEndWithZ := 0
-		for _, node := range nodes {
+			i++
+
 			if strings.HasSuffix(node.label, "Z") {
-				numNodesEndWithZ++
+				break
 			}
 		}
-
-		i++
-
-		if numNodesEndWithZ == len(nodes) {
-			break
-		}
+		indexAtZ[k] = big.NewInt(int64(i))
 	}
-	fmt.Println(i)
+
+	lcm := indexAtZ[0]
+	for _, value := range indexAtZ[1:] {
+		lcm = calcLCM(lcm, value)
+	}
+
+	fmt.Println(indexAtZ)
+	fmt.Println(lcm)
 }
