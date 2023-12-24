@@ -54,9 +54,7 @@ func (w *Workflow) process(p Part) []WorkflowResult {
 		n := queue.size()
 		for i := 0; i < n; i++ {
 			curPart := queue.get()
-			//fmt.Println("Processing", *curPart)
 			curWrs := f(curPart)
-			fmt.Println("  *  ", curWrs)
 			for _, wr := range curWrs {
 				if wr.result != "" {
 					wrs = append(wrs, wr)
@@ -116,7 +114,6 @@ func readInput(filename string) map[string]Workflow {
 				}
 
 				f := func(p Part) []WorkflowResult {
-					fmt.Println("    Calling f", condition, output, "with", p)
 					result := make([]WorkflowResult, 0)
 
 					var index int
@@ -186,7 +183,6 @@ func readInput(filename string) map[string]Workflow {
 				workflow = append(workflow, f)
 			} else {
 				f := func(p Part) []WorkflowResult {
-					fmt.Println("    Calling f", parts[0])
 					result := make([]WorkflowResult, 1)
 					result[0] = WorkflowResult{p, parts[0]}
 					return result
@@ -216,17 +212,13 @@ func findCombinations(workflows map[string]Workflow) int {
 	for !queue.empty() {
 		wr := queue.get()
 		w := workflows[wr.result]
-		fmt.Println("Calling", wr.part, wr.result)
 		newWrs := w.process(wr.part)
-		fmt.Println("  ", newWrs)
 		for _, newWr := range newWrs {
 			if newWr.result == "A" {
 				combinations += calcCombinations(newWr.part)
-			} else if newWr.result == "R" {
-				//fmt.Println("Rejecting", calcCombinations(newWr.part))
-			} else if newWr.result != "" {
+			} else if newWr.result != "" && newWr.result != "R" {
 				queue.put(newWr)
-			} else {
+			} else if newWr.result != "R" {
 				log.Fatal("failed to process")
 			}
 		}
