@@ -11,10 +11,7 @@ func ExtractNumber(line string) (int, error) {
 	var digits []string
 	for _, ch := range line {
 		if unicode.IsDigit(ch) {
-			digits = append(
-				digits,
-				string(ch),
-			)
+			digits = append(digits, string(ch))
 		}
 	}
 
