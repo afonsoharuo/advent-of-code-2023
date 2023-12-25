@@ -7,6 +7,9 @@ import (
 	"unicode"
 )
 
+// ExtractNumber returns a number from a string by combining the first and last
+// digits in it. If a single digit is found, the number is that digit repeated.
+// Returns an error if no digits are found in the string.
 func ExtractNumber(line string) (int, error) {
 	var digits []string
 	for _, ch := range line {
