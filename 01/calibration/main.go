@@ -1,15 +1,14 @@
 package main
 
 import (
+	"01/internal/digits"
 	"bufio"
 	"fmt"
 	"log"
 	"os"
-	"strconv"
-	"unicode"
 )
 
-func main() {
+func readInput(filename string) []int {
 	file, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -21,25 +20,18 @@ func main() {
 	var numbers []int
 	for scanner.Scan() {
 		line := scanner.Text()
-		var digits []string
-		for _, ch := range line {
-			if unicode.IsDigit(ch) {
-				digits = append(
-					digits,
-					string(ch),
-				)
-			}
-		}
-		nStr := digits[0] + digits[len(digits)-1]
-		n, err := strconv.Atoi(nStr)
+		n, err := digits.ExtractNumber(line)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(line)
-		fmt.Println(digits)
-		fmt.Println(n)
 		numbers = append(numbers, n)
 	}
+
+	return numbers
+}
+
+func main() {
+	numbers := readInput("input.txt")
 
 	sum := 0
 	for _, value := range numbers {
