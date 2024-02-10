@@ -1,30 +1,12 @@
 package main
 
 import (
+	"10/internal/queue"
 	"bufio"
 	"fmt"
 	"log"
 	"os"
-	"slices"
 )
-
-type Queue[T any] struct {
-	elems []T
-}
-
-func (q *Queue[T]) empty() bool {
-	return len(q.elems) == 0
-}
-
-func (q *Queue[T]) put(elem T) {
-	q.elems = append(q.elems, elem)
-}
-
-func (q *Queue[T]) get() T {
-	elem := q.elems[0]
-	q.elems = slices.Delete(q.elems, 0, 1)
-	return elem
-}
 
 type Node struct {
 	pipe      rune
@@ -46,15 +28,15 @@ func (node *Node) bFS(component int) {
 	node.explored = true
 	node.component = component
 
-	queue := Queue[*Node]{}
-	queue.put(node)
-	for !queue.empty() {
-		v := queue.get()
+	queue := queue.Queue[*Node]{}
+	queue.Put(node)
+	for !queue.Empty() {
+		v := queue.Get()
 		for _, w := range v.edges {
 			if !w.explored {
 				w.explored = true
 				w.component = component
-				queue.put(w)
+				queue.Put(w)
 			}
 		}
 	}
